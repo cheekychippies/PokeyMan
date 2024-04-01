@@ -1,5 +1,4 @@
 
-
 // Initialize variables
 let scene, camera, renderer, controls;
 
@@ -7,8 +6,6 @@ let scene, camera, renderer, controls;
 function init() {
     // Create scene
     scene = new THREE.Scene();
-
-
 
     // Create camera
     const aspect = window.innerWidth / window.innerHeight;
@@ -21,9 +18,14 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
+    const textureLoader = new THREE.TextureLoader();
+
+
     // Create plane
-    const planeGeometry = new THREE.PlaneGeometry(10, 10);
-    const planeMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
+    const planeGeometry = new THREE.PlaneGeometry(100, 100);
+    const planeMaterial = new THREE.MeshStandardMaterial({
+        //color: 0x00ff00,
+        map: textureLoader.load('img/street.jpg'), side: THREE.DoubleSide });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.rotation.x = -Math.PI / 2; // Rotate the plane to make it horizontal
     plane.receiveShadow = true;
@@ -31,10 +33,12 @@ function init() {
 
     // Create box
     const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
-    const boxMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+    const boxMaterial = new THREE.MeshStandardMaterial({
+        color: 0xff000 });
     const box = new THREE.Mesh(boxGeometry, boxMaterial);
     box.castShadow = true;
     box.position.set(0, 0.5, 0); // Place the box on top of the plane
+    //let boxId = box.id;
     scene.add(box);
 
 
@@ -47,8 +51,8 @@ function init() {
     sphere.position.set(2, 1, -1)
 
     // GridHelper
-    const gridHelper = new THREE.GridHelper();
-    scene.add(gridHelper);
+    const gridHelper = new THREE.GridHelper(100,100);
+   // scene.add(gridHelper);
 
     // Create orbit controls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -101,12 +105,29 @@ function init() {
     // Render the scene
     animate();
 }
+// Raycast
+const mousePosition = new THREE.Vector2();
+window.addEventListener('mousemove', function (e){
+    mousePosition.x = (e.clientX/ window.innerWidth) * 2-1;
+    mousePosition.y = - (e.clientY/ window.innerHeight) * 2+1;
+})
+const rayCaster = new THREE.Raycaster();
 
 // Animate function
 function animate() {
     requestAnimationFrame(animate);
+    rayCaster.setFromCamera(mousePosition, camera);
+    const intersects = rayCaster.intersectObjects(scene.children);
+    console.log(intersects);
+/*
+    for(let i = 0; i < intersects.length; i++ ){
+        if(intersects[i].object.id === boxId)
+            intersects[i].object.material.color.set(0xFF0000);
+    }
+*/
     renderer.render(scene, camera);
     controls.update(); // Update orbit controls
+
 
 }
 
