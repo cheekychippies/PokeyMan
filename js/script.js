@@ -1,6 +1,6 @@
 
 // Initialize variables
-let scene, camera, renderer, controls;
+let scene, camera, renderer, controls, mouse, raycaster ;
 
 // Initialize function
 function init() {
@@ -38,7 +38,6 @@ function init() {
     const box = new THREE.Mesh(boxGeometry, boxMaterial);
     box.castShadow = true;
     box.position.set(0, 0.5, 0); // Place the box on top of the plane
-    //let boxId = box.id;
     scene.add(box);
 
 
@@ -105,31 +104,43 @@ function init() {
     // Render the scene
     animate();
 }
-// Raycast
-const mousePosition = new THREE.Vector2();
-window.addEventListener('mousemove', function (e){
-    mousePosition.x = (e.clientX/ window.innerWidth) * 2-1;
-    mousePosition.y = - (e.clientY/ window.innerHeight) * 2+1;
-})
+// Raycaster
+
+    mouse = new THREE.Vector2();
+    raycaster = new THREE.Raycaster();
+
+
+function  onMouseClick(e){
+    mouse.x = (e.clientX/ window.innerWidth) * 2-1;
+    mouse.y = - (e.clientY/ window.innerHeight) * 2+1;
+    pickPiece();
+}
+
+//window.addEventListener('mousemove', onMouseMove, false);
+window.addEventListener('click', onMouseClick, false);
+
 const rayCaster = new THREE.Raycaster();
+
+
+function pickPiece(){
+    raycaster.setFromCamera(mouse, camera );
+    const intersects = rayCaster.intersectObjects(scene.children);
+    console.log(intersects);
+    for ( let i = 0; i < intersects.length; i ++ ) {
+        intersects[ i ].object.material.color.set( 0xff0000 );
+    }
+}
 
 // Animate function
 function animate() {
     requestAnimationFrame(animate);
-    rayCaster.setFromCamera(mousePosition, camera);
-    const intersects = rayCaster.intersectObjects(scene.children);
-    console.log(intersects);
-/*
-    for(let i = 0; i < intersects.length; i++ ){
-        if(intersects[i].object.id === boxId)
-            intersects[i].object.material.color.set(0xFF0000);
-    }
-*/
+
     renderer.render(scene, camera);
     controls.update(); // Update orbit controls
 
 
 }
+
 
 // Call the init function
 init();
